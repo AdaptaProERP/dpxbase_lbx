@@ -30,11 +30,10 @@ PROCE MAIN(oLbx)
        uValue:=oLbx:oCursor:FieldGet(oLbx:aColEdit[nAt,2])
 
        IF nAt>0 .AND. AccessField(oLbx:cTable,oLbx:aColEdit[nAt,2],3) .AND. ValType(uValue)="L"
-           // ? nAt,oLbx:cTable,oLbx:aColEdit[nAt,2]
-           SQLUPDATE(oLbx:cTable,oLbx:aColEdit[nAt,2],!uValue,cWhere)
-           oLbx:oCursor:aDataFill[oLbx:oCursor:RecNo(),oLbx:oBrw:nColSel]:=!uValue
-           oLbx:oBrw:DrawLine(.T.)
-           AUDITAR("DMOD" , NIL ,oLbx:cTable, cKey)
+           SQLUPDATE(oLbx:cTable,oLbx:aColEdit[nAt,2],!uValue,cWhere) // Actualiza el Campo
+           oLbx:oCursor:aDataFill[oLbx:oCursor:RecNo(),oLbx:oBrw:nColSel]:=!uValue // Actualiza el Browse
+           oLbx:oBrw:DrawLine(.T.) // Refresca el browse
+           AUDITAR("DMOD" , NIL ,oLbx:cTable, cKey) // Guarda Pista de Auditoría
            RETURN .T.
        ENDIF
 

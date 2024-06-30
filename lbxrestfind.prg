@@ -21,6 +21,12 @@ PROCE MAIN(oLbx,cType)
 
    cTable:=oLbx:oCursor:cTable
    cField:=oLbx:oCursor:aFields[1,1]
+
+   // 13/09/2023
+   IF !(ValType(cTable)="C" .AND. ValType(cField)="C")
+      RETURN NIL
+   ENDIF
+
    cGroup:=ALLTRIM(cTable)+"."+cType+"."+ALLTRIM(cField)
 
    cWhere:="DAT_GROUP"+GetWhere("=",cGroup)

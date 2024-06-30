@@ -11,21 +11,25 @@
 PROCE MAIN(cTable,cField,cWhere,cText)
     LOCAL cWhereRet:="",cGet1,cGet2,nLen:=0,nDec:=0,nRadio:=1
     LOCAL oGet1,oGet2,oDlg,oFont,oBtn,oRadio
-    LOCAL oControl
+    LOCAL oControl,aField,cFieldC:="",lData:=.F.,lTodos:=.F.
 
-    DEFAULT cTable:="DPCLIENTES",;
-            cText :="Nombre",;
-            cField:="CLI_NOMBRE",;
-            oDp:lLeft:=.F.,;
-            oDp:lLbxIniFind:=.F.,;
-            oDp:cLbxWhereAuto:=NIL
+    DEFAULT cTable           :="DPCLIENTES",;
+            cText            :="Nombre",;
+            cField           :="CLI_NOMBRE",;
+            oDp:lLeft        :=.F.,;
+            oDp:lLbxIniFind  :=.F.,;
+            oDp:cLbxWhereAuto:=NIL,;
+            oDp:oGetLbx      :=NIL
+
+   aField :=_VECTOR(cField,",")
+   cField :=IF(LEN(aField)>1,aField[1],cField)
+   cFieldC:=IF(LEN(aField)>1,aField[2],""    )
 
 // ? GETPROCE()
 // ? oDp:lLbxIniFind,oDp:lLbxRun
 //? oDp:Get("l"+"DPINV")
 //? oDp:oGetLbx:ClassName()
 // ? GETPROCE()
-
 //? cTable,cField,cWhere,cText,oDp:Get("l"+cTable) 
 
     IF oDp:lLbxIniFind .AND. !Empty(oDp:cLbxWhereAuto)
@@ -35,7 +39,11 @@ PROCE MAIN(cTable,cField,cWhere,cText)
 //? oDp:lLbxRun,"oDp:lLbxRun",oDp:lLbxIniFind,"oDp:lLbxIniFind"
 
     IF !oDp:Get("l"+cTable) 
-//.OR. (oDp:lLbxIniFind .AND. oDp:lLbxRun)
+
+       IF cTable=="DPCTA"
+         EJECUTAR("DPCTALBXFIND")
+       ENDIF
+
        RETURN NIL
     ENDIF
 
@@ -51,6 +59,10 @@ PROCE MAIN(cTable,cField,cWhere,cText)
     IF ValType(oDp:oLbx)="O" .AND. ValType(oDp:oLbx:oGet)="O"
        oControl:= oDp:oLbx:oGet
        cGet1   :=PADR(EVAL(oControl:bSetGet),nLen)
+
+       // 21/09/2023, sino esta vacio debe buscarlo en el brows
+       lData   :=!Empty(ALLTRIM(cGet1))
+
     ENDIF
 
     DEFINE FONT oFont  NAME "Tahoma" SIZE 0, -12 BOLD
@@ -82,18 +94,30 @@ PROCE MAIN(cTable,cField,cWhere,cText)
             WHEN !Empty(cGet2)
  
 
-    @03.7,12 SBUTTON oBtn ;
+    @03.7,12+5-8 SBUTTON oBtn ;
              SIZE 45, 20 FONT oFont;
              FILE "BITMAPS\XFIND2.BMP",,"BITMAPS\XFINDG2.BMP" NOBORDER;
              LEFT PROMPT "Buscar F6";
              COLORS CLR_BLACK, { CLR_WHITE, oDp:nGris, 1};
-             ACTION (BuscarReg());
+             ACTION (lTodos:=.F.,BuscarReg());
              WHEN !Empty(cGet1+cGet2)
 
     oBtn:cToolTip:="Buscar Registros"
     oBtn:cMsg    :=oBtn:cToolTip
 
-    @03.7,22 SBUTTON oBtn ;
+    @03.7,22-4 SBUTTON oBtn ;
+             SIZE 45, 20 FONT oFont;
+             FILE "BITMAPS\XBROWSE.BMP" NOBORDER;
+             LEFT PROMPT "Todos";
+             COLORS CLR_BLACK, { CLR_WHITE, oDp:nGris, 1 };
+             ACTION (lTodos:=.T.,oDlg:End()) CANCEL
+
+    oBtn:lCancel :=.T.
+    oBtn:cToolTip:="Cancelar y Cerrar Formulario "
+    oBtn:cMsg    :=oBtn:cToolTip
+
+
+    @03.7,22+5+0 SBUTTON oBtn ;
              SIZE 45, 20 FONT oFont;
              FILE "BITMAPS\XSALIR.BMP" NOBORDER;
              LEFT PROMPT "Cerrar";
@@ -107,17 +131,19 @@ PROCE MAIN(cTable,cField,cWhere,cText)
     AEVAL(oRadio:aItems,{|o|o:SetFont(oFont) })
 
     ACTIVATE DIALOG oDlg CENTERED ON INIT (EJECUTAR("FRMMOVE",oDlg,oControl),;
+                                           IF(lData,BuscarReg(),NIL),;
                                            oGet1:SetFocus(),.F.)
 
-// ? cWhereRet
-//  EJECUTAR("INSPECT",oRadio)
+    IF lTodos=.T.
+       cWhereRet:=" 1=1 "
+    ENDIF
 
 RETURN cWhereRet
 
 FUNCTION BuscarReg(nKey)
 
    LOCAL nCount,cScope,cOper:=" LIKE ",I,cWhereD
-   LOCAL aFields:={"INV_OBS1","INV_OBS2","INV_OBS3"}
+   LOCAL aFields:={"INV_OBS1","INV_OBS2","INV_OBS3","INV_CODIGO"}
    LOCAL cLeft:=IIF(oDp:lLeft,"","%")
 
    cScope:=cField+GetWhere(cOper,cLeft+ALLTRIM(cGet1)+"%")
@@ -140,8 +166,11 @@ FUNCTION BuscarReg(nKey)
       NEXT I
 
    ENDIF
- 
 
+   IF !Empty(cFieldC)
+
+   ENDIF
+ 
    nCount:=COUNT(cTable,cScope)
 
    oGet1:nLastKey:=0

@@ -10,10 +10,12 @@
 
 PROCE MAIN(oLbx)
   LOCAL cFieldFind,nColSel:=2
+  // LOCAL I,oCol,nCol,nEditType
   LOCAL lIniFilter:=CTOO(oLbx:cIniFilter,"L")
 
   SysRefresh(.T.)
 
+// ViewArray(oLbx:aColEdit)
 //? lIniFilter,"lIniFilter"
 
   IF !Empty(oLbx:cIniFilter) .AND. oLbx:oCursor:Recno()=1 .AND. lIniFilter 
@@ -40,6 +42,26 @@ PROCE MAIN(oLbx)
      DPFOCUS(oLbx:oBrw)
 
   ENDIF
+
+  oLbx:oFontBrw:=oLbx:oBrw:oFont
+
+  EJECUTAR("LBXCHANGE",oLbx)
+
+/*
+  FOR I=1 TO LEN(oLbx:aColEdit)
+     nCol     :=oLbx:aColEdit[I,1]
+     nEditType:=oLbx:aColEdit[I,4]
+     nEditType:=IF(nEditType=0 .AND. !Empty(oLbx:aColEdit[I,3]),1,nEditType)
+     oCol     :=oLbx:oBrw:aCols[nCol]
+
+     // ? oCol:ClassName()
+
+     IF nEditType>0
+        oCol:nEditType:=nEditType
+     ENDIF
+  
+  NEXT I
+*/
 
 // ? oLbx:lGoBottom,"oLbx"
 

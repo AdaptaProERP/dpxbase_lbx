@@ -9,16 +9,38 @@
 #INCLUDE "DPXBASE.CH"
 
 PROCE MAIN(oLbx,oCol,uValue,nLastKey)
-  LOCAL nField,cFunction,lValid:=.F.
-  
+  LOCAL nField,cFunction,lValid:=.F.,cWhere,cKey
+
   IF !Empty(oCol:cField)
 
      nField   :=oCol:nColArray
-     cFunction:=oCol:cFunction
 
-     IF ValType(oLbx:oScript)="O" 
+     IF Empty(cFunction)
 
-        IF oLbx:oScript:IsFunction(cFunction)
+        cKey:=oLbx:cOrderBy
+
+        IF Empty(cKey)
+          cKey:=oLbx:cPrimary
+        ENDIF
+
+        IF Empty(cKey)
+           MsgMemo("Requiere Campo Clave para Editar el Registro")
+           RETURN .F.
+        ENDIF
+
+        cWhere:=oLbx:oCursor:GetWhereKey(cKey)
+
+        lValid:=.T.
+
+        SQLUPDATE(oLbx:cTable,oCol:cField,uValue,cWhere)
+
+     ELSE
+
+       cFunction:=oCol:cFunction
+
+       IF ValType(oLbx:oScript)="O" 
+
+         IF oLbx:oScript:IsFunction(cFunction)
 
            lValid:=oLbx:oScript:Run(cFunction,uValue,oCol,oLbx,oLbx:oCursor)
 
@@ -35,16 +57,13 @@ PROCE MAIN(oLbx,oCol,uValue,nLastKey)
            EJECUTAR("INSPECT",oLbx:oScript)
 
         ENDIF
-
+       ENDIF
      ENDIF
 
      IF lValid
        oLbx:oCursor:aDataFill[oLbx:oCursor:Recno(),nField]:=uValue
        oLbx:oBrw:DrawLine(.T.)
      ENDIF
-
-// ? oLbx:oCursor:Recno(),"RECNO",nField,"nField",oCol:cFunction,oLbx:oScript:ClassName()
-// ViewArray(oLbx:oCursor:aDataFill)
 
   ENDIF
 

@@ -22,6 +22,8 @@ PROCE MAIN(oLbx,oCol,uValue,nLastKey)
 
            lValid:=oLbx:oScript:Run(cFunction,uValue,oCol,oLbx,oLbx:oCursor)
 
+           // ? lValid,cFunction,uValue,oCol,oLbx,oLbx:oCursor
+
            IF ValType(lValid)<>"L"
               lValid:=.F.
            ENDIF
@@ -29,6 +31,8 @@ PROCE MAIN(oLbx,oCol,uValue,nLastKey)
         ELSE
 
            MsgMemo("FUNCTION "+cFunction+" no existe en Formulario "+oLbx:cFileLbx)
+
+           EJECUTAR("INSPECT",oLbx:oScript)
 
         ENDIF
 

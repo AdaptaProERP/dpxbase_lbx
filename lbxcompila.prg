@@ -29,6 +29,10 @@ PROCE MAIN(oLbx)
    ELSE
 
       oLbx:cScript:=SUBS(oLbx:cMemo,nAt,LEN(oLbx:cMemo))
+      oLbx:cScript:=STRTRAN(oLbx:cScript,CHR(13)+CHR(13),"") // resuelve funciones no encontrada
+      // oLbx:cScript:=STRTRAN(oLbx:cScript,CHR(09)        ,"") // resuelve funciones no encontrada
+      // oLbx:cScript:=STRTRAN(oLbx:cScript,CHR(10)        ,"") // resuelve funciones no encontrada
+
 
       oScript:=TScript():New("")
       oScript:cProgram:=cFileNoPath(cFileNoExt(oLbx:cFileLbx))
@@ -39,6 +43,7 @@ PROCE MAIN(oLbx)
 
       // Error de Compilación
       IF !Empty(oScript:cError)
+        MsgMemo("Error Compilación"+oScript:cError,oLbx:cFileLbx)
         oScript:End()
         RETURN NIL
       ENDIF
@@ -48,7 +53,7 @@ PROCE MAIN(oLbx)
    oLbx:oScript:=oScript
 
    IF ValType(oLbx:oScript)="O" .AND. oLbx:oScript:IsFunction("ONCHANGE")
-       oLbx:lONCHANGE:=.T.
+      oLbx:lONCHANGE:=.T.
    ENDIF
 
 RETURN oScript

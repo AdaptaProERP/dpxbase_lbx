@@ -24,9 +24,12 @@ PROCE MAIN(oLbx)
         oCol:cEditPicture:=STRTRAN(cPicture,",","")
         oCol:bOnPostEdit :={|oCol,uValue,nLastKey,nCol|EJECUTAR("LBXFIELDVALID",oDp:oLbx,oCol,uValue,nLastKey),oDp:oLbx:lFind:=.F.,KillFind(oDp:oLbx:oBrw,oDp:oLbx:oBrw:nColSel)}
      ENDIF
-
   
   NEXT I
+
+  IF ValType(oLbx:oScript)="O" .AND. oLbx:oScript:IsFunction("ONCHANGE")
+     oLbx:oScript:Run("ONCHANGE",oLbx,oLbx:oCursor)
+  ENDIF
 
 RETURN .T.
 // EOF
